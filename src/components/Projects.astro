@@ -1,0 +1,104 @@
+---
+import Section from "./Section.astro";
+import { Image } from "astro:assets";
+import type { ProjectProps, ProjectCategory } from "@types";
+
+interface Props {
+  projects: ProjectProps[];
+}
+
+const { projects } = Astro.props;
+
+const CATEGORY_LABELS: Record<ProjectCategory, string> = {
+  personal: "Personal Projects",
+  research: "Research",
+  hackathon: "Hackathons",
+  class: "Class Project",
+};
+
+const categoryOrder: ProjectCategory[] = [
+  "personal",
+  "research",
+  "hackathon",
+  "class",
+];
+
+const grouped = projects.reduce<Record<ProjectCategory, ProjectProps[]>>(
+  (acc, proj) => {
+    const category = (proj.category ?? "personal") as ProjectCategory;
+    if (!acc[category]) acc[category] = [] as ProjectProps[];
+    acc[category].push(proj);
+    return acc;
+  },
+  { personal: [], research: [], hackathon: [], class: [] }
+);
+---
+
+<Section text="Featured Projects" href="projects">
+  {categoryOrder.map((cat) => (
+    grouped[cat] && grouped[cat].length > 0 ? (
+      <div>
+        <h3 class="mb-6 mt-2 text-xl font-semibold text-white">{CATEGORY_LABELS[cat]}</h3>
+        {
+          grouped[cat].map(({ name, summary, image, linkPreview, linkSource, tags }, index) => {
+            const top = 98 + index * 40;
+            return (
+              <div
+                style={`top: ${top}px;`}
+                class="sticky mb-12 rounded-2xl border border-neutral/20 bg-black"
+              >
+                <div class="bg-difu relative z-[1] grid h-[580px] w-full grid-rows-2 rounded-2xl bg-[#1c232d]/85 before:absolute before:inset-0 before:z-[-1] before:rounded-2xl before:bg-[url(/raja.png)] before:bg-[length:128px] before:bg-repeat before:opacity-[5%] before:content-[''] sm:grid-cols-2 sm:grid-rows-1 md:h-96">
+                  <div class="px-6 pt-12">
+                    <h4 class="mb-5 font-serif text-3xl font-medium text-primary">{name}</h4>
+                    <p class="text-base text-neutral">{summary}</p>
+                    {tags && tags.length ? (
+                      <div class="mt-4 flex flex-wrap gap-2">
+                        {tags.map((tag) => (
+                          <span class="rounded-md border border-neutral/20 bg-black px-2 py-1 text-xs text-neutral">{tag}</span>
+                        ))}
+                      </div>
+                    ) : null}
+                    <div class="flex gap-5 pt-10 text-white">
+                      {linkSource ? (
+                        <a
+                          href={linkSource}
+                          target="_blank"
+                          class="after:relative after:bottom-[-5px] after:content-[url(/external.svg)] hover:underline"
+                        >
+                          Source
+                        </a>
+                      ) : null}
+                      {linkPreview ? (
+                        <a
+                          href={linkPreview}
+                          target="_blank"
+                          class="after:relative after:bottom-[-5px] after:content-[url(/external.svg)] hover:underline"
+                        >
+                          Preview
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-center overflow-hidden">
+                    {image ? (
+                      <Image
+                        class="h-full w-[95%] rounded-ss-xl rounded-ee-2xl object-contain object-center sm:h-[85%] sm:w-full"
+                        src={image}
+                        alt={name}
+                        width="736"
+                        height="483"
+                      />
+                    ) : (
+                      <div class="h-full w-[95%] rounded-ss-xl rounded-ee-2xl bg-gradient-to-br from-neutral/20 to-neutral/5 sm:h-[85%] sm:w-full" />
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+        <div class="h-10" />
+      </div>
+    ) : null
+  ))}
+</Section>

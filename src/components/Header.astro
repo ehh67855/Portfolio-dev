@@ -1,0 +1,190 @@
+---
+import Menu from "@icons/Menu.astro";
+import { Image } from "astro:assets";
+import type { SiteConfig } from "@types";
+
+type Props = Pick<SiteConfig, "siteLogo" | "navLinks" | "socialLinks">;
+
+const { siteLogo, navLinks, socialLinks } = Astro.props;
+---
+
+<header
+  class="sticky top-0 z-50 mx-auto flex max-w-5xl animate-slide-in justify-between bg-black px-5 py-6"
+>
+  <a href="/" aria-label="Home link">
+    <Image
+      class="rounded-full"
+      src={siteLogo}
+      width="45"
+      height="45"
+      alt="website logo"
+    />
+  </a>
+
+  <button
+    type="button"
+    id="menu-button"
+    class="px-1.5 text-neutral sm:hidden"
+    aria-expanded="false"
+    aria-controls="main-menu"
+  >
+    <Menu />
+  </button>
+
+  <ul class="hidden items-center gap-4 text-xs text-neutral sm:flex">
+    {(socialLinks || [])
+      .filter((s) => ["LinkedIn", "Github", "Youtube"].includes(s.text))
+      .map(({ text, href }) => (
+        <li>
+          <a
+            href={href}
+            target="_blank"
+            class="hover:text-white"
+            rel="noopener noreferrer"
+          >
+            {text}
+          </a>
+        </li>
+      ))}
+  </ul>
+
+  <nav
+    class="absolute top-20 right-5 hidden rounded-xl border border-neutral/40 bg-black px-4 py-5 text-neutral sm:static sm:block sm:border-0 sm:bg-transparent sm:p-0"
+    id="main-menu"
+  >
+    <ul class="gap-2 sm:flex">
+      {
+        navLinks.map((link) => (
+          <li class="relative">
+            <a
+              class={`nav-item relative block p-2 text-sm font-medium transition-all duration-500 after:absolute after:bottom-0 after:left-2/4 after:h-2 after:w-1 after:-translate-x-2/4 after:text-primary after:opacity-0 after:content-['•'] hover:text-white`}
+              href={link.href}
+            >
+              {link.text}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<script>
+  // Toggle mobile menu
+  const button = document.querySelector("#menu-button");
+  const menu = document.querySelector("#main-menu");
+  const navItems = document.querySelectorAll("#main-menu > ul > li > a");
+
+  const toggleMenu = () => {
+    menu?.classList.toggle("hidden");
+    const isHidden = menu?.classList.contains("hidden");
+    button?.setAttribute("aria-expanded", `${!isHidden}`);
+  };
+
+  button?.addEventListener("click", toggleMenu);
+  navItems.forEach((item) => {
+    item?.addEventListener("click", toggleMenu);
+  });
+
+  // Update navigation based on scroll position with Intersection Observer
+  const NAV_ACTIVE_CLASSES = ["text-white", "after:opacity-100", "md:after:opacity-100"];
+
+  /** @type {Map<string, HTMLAnchorElement>} */
+  const navIdToItem = new Map();
+  navItems.forEach((item) => {
+    const href = item.getAttribute("href") || "";
+    if (href.startsWith("#")) {
+      navIdToItem.set(href.slice(1), item);
+    }
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const id = entry.target.id;
+        const activeItem = navIdToItem.get(id);
+        if (!activeItem) return;
+
+        if (entry.isIntersecting) {
+          navItems.forEach((item) => item.classList.remove(...NAV_ACTIVE_CLASSES));
+          activeItem.classList.add(...NAV_ACTIVE_CLASSES);
+        }
+      });
+    },
+    {
+      // Trigger when section is roughly centered in viewport
+      rootMargin: "-40% 0px -50% 0px",
+      threshold: [0, 0.25, 0.5, 0.75, 1],
+    },
+  );
+
+  navIdToItem.forEach((_item, id) => {
+    const section = document.getElementById(id);
+    if (section) observer.observe(section);
+  });
+
+  // Set initial state on load
+  const setInitial = () => {
+    let firstVisibleId = "";
+    navIdToItem.forEach((_item, id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight * 0.6 && rect.bottom > window.innerHeight * 0.4;
+      if (inView && !firstVisibleId) firstVisibleId = id;
+    });
+    if (firstVisibleId) {
+      navItems.forEach((item) => item.classList.remove(...NAV_ACTIVE_CLASSES));
+      const activeItem = navIdToItem.get(firstVisibleId);
+      activeItem?.classList.add(...NAV_ACTIVE_CLASSES);
+    }
+  };
+  setInitial();
+  window.addEventListener("load", setInitial);
+  window.addEventListener("resize", setInitial);
+
+  // Fallback: scroll-based highlighting using viewport center
+  let ticking = false;
+  const updateActiveByCenter = () => {
+    /** @type {string | null} */
+    let activeId = null;
+    const center = window.innerHeight * 0.5;
+    navIdToItem.forEach((_item, id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const inView = rect.top <= center && rect.bottom >= center;
+      if (inView) activeId = id;
+    });
+    if (activeId) {
+      navItems.forEach((item) => item.classList.remove(...NAV_ACTIVE_CLASSES));
+      navIdToItem.get(activeId)?.classList.add(...NAV_ACTIVE_CLASSES);
+    }
+    ticking = false;
+  };
+
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateActiveByCenter);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // Cleanup observer
+  document.onvisibilitychange = () => {
+    if (document.visibilityState === "hidden") {
+      observer.disconnect();
+    } else {
+      document.querySelectorAll("section").forEach((section) => {
+        observer.observe(section);
+      });
+    }
+  };
+</script>
+
+<style>
+  header {
+    animation-timeline: scroll();
+    animation-range: 0 650px;
+  }
+</style>

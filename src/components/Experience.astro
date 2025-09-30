@@ -1,0 +1,53 @@
+---
+import Section from "./Section.astro";
+import ExperienceItem from "./ExperienceItem.astro";
+import type { ExperienceProps } from "@types";
+
+interface Props {
+  experience: ExperienceProps[];
+}
+
+const { experience } = Astro.props;
+---
+
+<Section text="Work Experience" href="experience">
+  {
+    (() => {
+      const hiddenCompanies = new Set(["WebMD", "University of Georgia"]);
+      const visible = experience.filter((e) => !hiddenCompanies.has(e.company));
+      const hidden = experience.filter((e) => hiddenCompanies.has(e.company));
+
+      return (
+        <>
+          {visible.map((item) => (
+            <ExperienceItem {...item} />
+          ))}
+
+          <div id="hidden-experience" class="hidden">
+            {hidden.map((item) => (
+              <ExperienceItem {...item} />
+            ))}
+          </div>
+
+          <div class="mt-2">
+            <button id="toggle-experience" class="text-primary underline underline-offset-4">
+              See all experience
+            </button>
+          </div>
+
+          <script>
+            const btn = document.getElementById("toggle-experience");
+            const hiddenEl = document.getElementById("hidden-experience");
+            if (btn && hiddenEl) {
+              btn.addEventListener("click", () => {
+                const isHidden = hiddenEl.classList.contains("hidden");
+                hiddenEl.classList.toggle("hidden");
+                btn.textContent = isHidden ? "Show less" : "See all experience";
+              });
+            }
+          </script>
+        </>
+      );
+    })()
+  }
+</Section>

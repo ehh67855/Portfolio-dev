@@ -32,6 +32,33 @@ export const SITE_CONTENT: SiteContent = {
   },
   experience: [
     {
+      company: "National Aeronautics and Space Administration (NASA)",
+      position: "GPU Flight Software Development Intern",
+      startDate: "August 2026",
+      endDate: "Present",
+      summary: [
+        "Researched and developed novel computer vision techniques for neural rendering within NASA’s Distributed Spacecraft Autonomy group as part of the Neural Radiance Methods team.",
+        "Designed and implemented DTM-NeRF in C++, CUDA, and LibTorch, a NeRF model that jointly generates surface, bare-earth, and canopy height models, achieving 2.1m average canopy height accuracy against lidar reference data.",
+        "Co-authored an IEEE Aerospace 2027 paper on SPECTRA-NeRF, a novel architecture that captures vegetation biophysics by integrating an RPV bidirectional reflectance model and geometric shadow mapping.",
+        "Decreased surface error spread of learned scene representations from 7.3m to 6.8m and improved PSNR by 0.3 dB by converting sun vectors to ECEF coordinates, correcting a sun-direction error of up to 59°.",
+        "Built bundle-adjusted satellite datasets with the Ames Stereo Pipeline, cutting surface error from 11m to 2–3m and correcting camera misregistration of up to 66m.",
+        "Ran hyper-parameter fine tuning experiments that improved surface error spread from 0.83m to 0.67m.",
+      ],
+    },
+    {
+      company: "National Aeronautics and Space Administration (NASA)",
+      position: "GPU Flight Software Development Intern",
+      startDate: "June 2026",
+      endDate: "August 2026",
+      summary: [
+        "Re-architected the Neural Radiance Methods codebase’s point cloud system to be extensible to different types of point clouds, using a templated factory keyed on elevation model type and 7 sensor sources (NEON lidar, LOLA, GEDI, ICESat-2, EarthDEM, ArcticDEM, Copernicus).",
+        "Accelerated depth-map generation by 40x by migrating ray-mesh intersection algorithms from the CPU to custom CUDA kernels, raising depth-map coverage from 77% to 100%.",
+        "Built the pipeline for integrating bare-earth terrain data into neural scene representations, including reading DTM rasters, writing values into ray bundles, and per-image depth maps of DTM, laying the groundwork for DTM-NeRF.",
+        "Refactored the codebase’s per-image map generation step to be easily extensible to new map types.",
+        "Shipped 21 merged pull requests, including fixes to NeuS/NeuDF models, CSM camera ray generation, and reflectance map saving.",
+      ],
+    },
+    {
       company: "University of Georgia, Center for Geospatial Research",
       position: "Graduate Research Assistant",
       startDate: "May 2025",
